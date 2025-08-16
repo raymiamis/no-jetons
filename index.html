@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jetons – Spieloberfläche</title>
+  <style>
+    .row {
+      margin: 10px 0;
+      display: flex;
+      gap: 10px;
+    }
+    label {
+        margin: 10px 0;
+        font-size: 25px;
+        display: flex;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    input[type="number"] {
+      padding: 10px;
+      font-size: 18px;
+      width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jetons: <input id="balance" type="number" min="0" step="1" value="100" /></h1>
+
+  <div class="row">
+    <label for="bet">Bet:</label>
+    <input id="bet" type="number" min="0" step="1" value="10" />
+    <button type="button" id="plus">+1</button>
+    <button type="button" id="minus">-1</button>
+  </div>
+
+  <div class="row">
+    <button type="button" data-action="win">Win</button>
+    <button type="button" data-action="loss">Loss</button>
+  </div>
+
+  <div class="row">
+    <button type="button" data-action="even">Even</button>
+  </div>
+
+  <script>
+    const balanceEl = document.getElementById('balance');
+    const betInput  = document.getElementById('bet');
+    const plusBtn   = document.getElementById('plus');
+    const minusBtn  = document.getElementById('minus');
+
+    let balance = 100;
+
+    const clampBet = () => {
+      const n = Math.max(0, Math.floor(Number(betInput.value || 0)));
+      betInput.value = n;
+      return n;
+    };
+
+    const clampBalance = () => {
+      const n = Math.max(0, Math.floor(Number(balanceEl.value || 0)));
+      balanceEl.value = n;
+      balance = n;
+      return n;
+    };
+
+    plusBtn.addEventListener('click', () => { betInput.value = clampBet() + 1; });
+    minusBtn.addEventListener('click', () => { betInput.value = Math.max(0, clampBet() - 1); });
+
+    function updateBalance(newValue){
+      balance = Math.max(0, Math.floor(newValue));
+      balanceEl.value = balance;
+    }
+
+    function onAction(kind){
+      const bet = clampBet();
+      clampBalance();
+      if(bet <= 0) return;
+      switch(kind){
+        case 'win':   updateBalance(balance + bet); break;
+        case 'loss':  updateBalance(Math.max(0, balance - bet)); break;
+        case 'even':  break;
+      }
+    }
+
+    document.querySelectorAll('button[data-action]').forEach(btn =>
+      btn.addEventListener('click', () => onAction(btn.dataset.action))
+    );
+
+    balanceEl.addEventListener('input', clampBalance);
+  </script>
+</body>
+</html>
